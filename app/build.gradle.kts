@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    kotlin("kapt")
 }
 
 android {
@@ -36,6 +37,14 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    kapt {
+        correctErrorTypes = true
+        useBuildCache = true // Optional: enable build cache for kapt
+        javacOptions {
+            // Specify the Java version here
+            option("target", "1.8")
+        }
+    }
     buildFeatures {
         compose = true
     }
@@ -61,6 +70,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.jsoup)
     implementation(libs.androidx.appcompat)
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
