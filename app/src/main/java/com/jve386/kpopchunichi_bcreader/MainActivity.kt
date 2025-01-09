@@ -2,23 +2,19 @@ package com.jve386.kpopchunichi_bcreader
 
 import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
 
 class MainActivity : AppCompatActivity() {
     private lateinit var editTextBarcode: EditText
     private lateinit var buttonSearch: Button
     private lateinit var textViewProductName: TextView
-    private lateinit var imageViewProduct: ImageView
     private lateinit var textViewProductPrice: TextView
+    private lateinit var buttonLoadTxt: Button
+    private lateinit var buttonLoadExcel: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,9 +24,11 @@ class MainActivity : AppCompatActivity() {
         editTextBarcode = findViewById(R.id.editTextBarcode)
         buttonSearch = findViewById(R.id.buttonSearch)
         textViewProductName = findViewById(R.id.textViewProductName)
-        imageViewProduct = findViewById(R.id.imageViewProduct)
         textViewProductPrice = findViewById(R.id.textViewProductPrice)
+        buttonLoadTxt = findViewById(R.id.buttonLoadTxt)
+        buttonLoadExcel = findViewById(R.id.buttonLoadExcel)
 
+        // Setea el listener para el botón de búsqueda
         buttonSearch.setOnClickListener {
             val barcode = editTextBarcode.text.toString().trim()
             if (barcode.isNotEmpty()) {
@@ -39,6 +37,26 @@ class MainActivity : AppCompatActivity() {
                 textViewProductName.text = "Introduce un código de barras válido."
             }
         }
+
+        // Listener para el botón "Cargar txt"
+        buttonLoadTxt.setOnClickListener {
+            loadTxt() // Llamada a la función vacía
+        }
+
+        // Listener para el botón "Cargar Excel"
+        buttonLoadExcel.setOnClickListener {
+            loadExcel() // Llamada a la función vacía
+        }
+    }
+
+    // Función vacía para cargar txt
+    private fun loadTxt() {
+        // Aquí agregarás el código para cargar un archivo txt
+    }
+
+    // Función vacía para cargar Excel
+    private fun loadExcel() {
+        // Aquí agregarás el código para cargar un archivo Excel
     }
 
     private inner class FetchProductInfoTask : AsyncTask<String, Void, ProductInfo>() {
@@ -50,55 +68,31 @@ class MainActivity : AppCompatActivity() {
 
             return try {
                 // Realiza la conexión y obtiene el documento HTML
-                val document: Document = Jsoup.connect(url).get()
+                val document = Jsoup.connect(url).get()
 
                 // Extraer el nombre del producto
-                val nameElement: Element? = document.selectFirst("div.product-description h3.product-title")
-                val productName = nameElement?.text() ?: "Producto no encontrado"  // Si no hay nombre, mostrar mensaje predeterminado
+                val nameElement = document.selectFirst("div.product-description h3.product-title")
+                val productName = nameElement?.text() ?: "Producto no encontrado"
 
-                // Extraer la imagen del producto
-                val imageElement: Element? = document.selectFirst("#product-images-large img")
-                Log.d("ProductInfo", "Elementos encontrados: ${document.select("div#product-images-large img").size}")
-                // Verifica que el 'src' es relativo o absoluto
-                val imageUrl = imageElement?.attr("src")?.let {
-                    if (it.startsWith("/")) "https://www.chunichicomics.com$it" else it
-                } ?: ""
-                Log.d("ProductInfo", "Imagen URL: $imageUrl")  // Aquí puedes comprobar el valor de la URL
 
                 // Extraer el precio
-                val priceElement: Element? = document.selectFirst("span.product-price")
-                val price = priceElement?.text() ?: "Precio no disponible"  // Si no hay precio, mostrar mensaje predeterminado
+                val priceElement = document.selectFirst("span.product-price")
+                val price = priceElement?.text() ?: "Precio no disponible"
 
                 // Retorna la información del producto
-                ProductInfo(productName, imageUrl, price)
+                ProductInfo(productName, price)
             } catch (e: Exception) {
-                Log.e("ProductInfo", "Error al obtener datos: ${e.message}")
-                // En caso de error, devuelve un objeto vacío o con un mensaje de error
-                ProductInfo("Error: ${e.message}", "", "")
+                ProductInfo("Error: ${e.message}",  "")
             }
         }
 
         override fun onPostExecute(result: ProductInfo) {
-            // Depuración: Mostrar la URL de la imagen obtenida
-            Log.d("ProductInfo", "Imagen URL: ${result.imageUrl}")
-
-            // Actualiza la interfaz de usuario con la información obtenida
+            // Actualizar la UI con el nombre y precio
             textViewProductName.text = result.name
             textViewProductPrice.text = result.price
-
-            // Si la URL de la imagen no está vacía, carga la imagen con Glide
-            if (result.imageUrl.isNotEmpty()) {
-                Glide.with(this@MainActivity)
-                    .load(result.imageUrl)
-                    .centerCrop()  // Ajuste de la imagen para que ocupe toda la vista de manera proporcional
-                    .into(imageViewProduct)
-            } else {
-                // Si no hay URL de imagen, elimina la imagen en la vista
-                imageViewProduct.setImageDrawable(null)
-            }
         }
     }
 
     // Data class para almacenar la información del producto
-    data class ProductInfo(val name: String, val imageUrl: String, val price: String)
+    data class ProductInfo(val name: String, val price: String)
 }
