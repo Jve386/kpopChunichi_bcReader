@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         override fun doInBackground(vararg barcodes: String): ProductInfo {
             val barcode = barcodes[0]  // Extrae el código de barras del parámetro
 
-            // Asegúrate de que la URL esté correctamente formada
+            // enlace a la web
             val url = "https://www.chunichicomics.com/busqueda?controller=search&s=$barcode"
 
             return try {
