@@ -10,6 +10,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var editTextBarcode: EditText
@@ -18,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textViewProductPrice: TextView
     private lateinit var buttonLoadTxt: Button
     private lateinit var buttonLoadExcel: Button
+    private lateinit var buttonScanBarcode: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +34,12 @@ class MainActivity : AppCompatActivity() {
         textViewProductPrice = findViewById(R.id.textViewProductPrice)
         buttonLoadTxt = findViewById(R.id.buttonLoadTxt)
         buttonLoadExcel = findViewById(R.id.buttonLoadExcel)
+        buttonScanBarcode = findViewById(R.id.buttonScanBarcode)
+
+        // Setea el listener para el botón de escaneo de códigos de barras
+        buttonScanBarcode.setOnClickListener {
+            startBarcodeScanner()
+        }
 
         // Setea el listener para el botón de búsqueda
         buttonSearch.setOnClickListener {
@@ -91,4 +101,24 @@ class MainActivity : AppCompatActivity() {
 
     // Data class para almacenar la información del producto
     data class ProductInfo(val name: String, val price: String)
+
+    private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            editTextBarcode.setText(result.contents)
+            fetchProductInfo(result.contents)  // Buscar el producto escaneado
+        } else {
+            textViewProductName.text = "Escaneo cancelado."
+        }
+    }
+
+    private fun startBarcodeScanner() {
+        val options = ScanOptions().apply {
+            setPrompt("Escanea el código de barras")
+            setBeepEnabled(true)
+            setOrientationLocked(false)  // Asegura que siga la orientación del dispositivo
+            setCaptureActivity(PortraitCaptureActivity::class.java)  // Forzar vertical
+            setBarcodeImageEnabled(true)
+        }
+        barcodeLauncher.launch(options)
+    }
 }

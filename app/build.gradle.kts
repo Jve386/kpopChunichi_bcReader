@@ -88,4 +88,5 @@ dependencies {
     implementation(libs.glide)
 //    ksp(libs.glide.compiler)  // Cambiado de kapt a ksp
     implementation(libs.coroutines.android)
+    implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
 }
