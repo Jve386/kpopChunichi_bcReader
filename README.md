@@ -39,7 +39,7 @@ Aplicación ligera para Android que permite escanear códigos de barras y obtene
 
 ### Arquitectura
 
-- **Modelo Vista-Controlador (MVC)**: La aplicación sigue el patrón de arquitectura MVC (Modelo-Vista-Controlador) para una mejor separación de responsabilidades y un flujo de datos más limpio.
+- **Model-view-viewmodel (MVVM)**: La aplicación sigue el patrón de arquitectura MVVM para una mejor separación de responsabilidades y un flujo de datos más limpio.
 
 
 ## Licencia
