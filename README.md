@@ -33,7 +33,7 @@ Aplicación ligera para Android que permite escanear códigos de barras y obtene
 
 ### Otras Herramientas
 
-- **Coroutines (Kotlin)**: Utilizado para la programación asíncrona y la gestión de operaciones de red, como la obtención de información de productos desde la web.
+- **Coroutines (Kotlin)**: Realiza de manera asíncrona la obtención de la información del producto en la función fetchProductInfo, permitiendo que la solicitud a la web se ejecute en un hilo de fondo (utilizando Dispatchers.IO), mientras se mantiene la interfaz de usuario fluida sin bloqueos.
   
 - **Android Lifecycle**: Utilizado para gestionar los ciclos de vida de las actividades y optimizar el uso de recursos.
 
