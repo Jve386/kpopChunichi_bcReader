@@ -86,8 +86,10 @@ dependencies {
     // Dependencias actualizadas
     implementation(libs.material)
     implementation(libs.glide)
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
 //    ksp(libs.glide.compiler)  // Cambiado de kapt a ksp
     implementation(libs.coroutines.android)
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("org.apache.poi:poi-ooxml:5.2.4")
+
 }

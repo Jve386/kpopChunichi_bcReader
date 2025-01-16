@@ -30,59 +30,70 @@
         android:id="@+id/buttonSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Buscar"
         android:layout_below="@id/editTextBarcode"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:text="Buscar" />
 
     <!-- Nombre del producto -->
     <TextView
         android:id="@+id/textViewProductName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/buttonSearch"
+        android:layout_marginTop="16dp"
         android:text=""
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_below="@id/buttonSearch"
-        android:layout_marginTop="16dp" />
+        android:textStyle="bold" />
 
     <!-- Precio del producto -->
     <TextView
         android:id="@+id/textViewProductPrice"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="18sp"
-        android:textColor="@android:color/holo_green_dark"
         android:layout_below="@id/textViewProductName"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:text=""
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="18sp" />
 
-    <!-- Botones Cargar Txt y Cargar Excel -->
+    <ImageView
+        android:id="@+id/imageViewProduct"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@id/textViewProductPrice"
+        android:layout_marginTop="16dp"
+        android:contentDescription="Imagen del producto"
+        android:scaleType="centerCrop" />
+
+
+    <!-- Boton pra generar excell-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@id/textViewProductPrice"
+        android:layout_above="@id/textViewFooter"
+        android:layout_marginTop="16dp"
         android:gravity="center"
-        android:layout_marginTop="16dp">
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/buttonLoadTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cargar codigos de barras"
             android:layout_marginEnd="8dp"
+            android:text="Cargar codigos de barras"
             android:textSize="14sp" />
     </LinearLayout>
 
+    <!-- Footer -->
     <TextView
         android:id="@+id/textViewFooter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="cabroooooooo"
-        android:textSize="12sp"
-        android:textColor="@android:color/darker_gray"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp"
+        android:text="cabroooooooo"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp" />
 
 </RelativeLayout>
