@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.KpopChunichi_bcReader" parent="android:Theme.Material.Light.NoActionBar" >
+    <style name="Theme.KpopChunichi_bcReader" parent="@style/Theme.AppCompat.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/purple_700</item>
         <item name="colorPrimaryVariant">@color/purple_500</item>
         <item name="colorAccent">@color/teal_200</item>

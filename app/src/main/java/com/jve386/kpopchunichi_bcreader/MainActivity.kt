@@ -1,6 +1,5 @@
 package com.jve386.kpopchunichi_bcreader
 
-import android.os.AsyncTask
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -78,11 +77,12 @@ class MainActivity : AppCompatActivity() {
 
                     ProductInfo(productName, price)
                 } catch (e: Exception) {
-                    ProductInfo("Error: ${e.message}", "")
+                    // Provide a more detailed error message
+                    ProductInfo("Error: ${e.message ?: "Unknown error"}", "")
                 }
             }
 
-            // Actualiza la UI
+            // Update UI with the result
             textViewProductName.text = productInfo.name
             textViewProductPrice.text = productInfo.price
         }
