@@ -1,4 +1,4 @@
-package com.jve386.kpopchunichi_bcreader
+package com.jve386.kpopchunichi_bcreader.ui
 
 import com.journeyapps.barcodescanner.CaptureActivity
 import android.content.pm.ActivityInfo

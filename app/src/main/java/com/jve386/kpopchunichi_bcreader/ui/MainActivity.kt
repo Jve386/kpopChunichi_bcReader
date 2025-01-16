@@ -1,7 +1,5 @@
-package com.jve386.kpopchunichi_bcreader
+package com.jve386.kpopchunichi_bcreader.ui
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -10,21 +8,27 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.jve386.kpopchunichi_bcreader.R
+import com.jve386.kpopchunichi_bcreader.model.ProductInfo
+import com.jve386.kpopchunichi_bcreader.data.ProductService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jsoup.Jsoup
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import com.bumptech.glide.Glide
+import android.content.Intent
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var editTextBarcode: EditText
     private lateinit var buttonSearch: Button
     private lateinit var textViewProductName: TextView
     private lateinit var textViewProductPrice: TextView
     private lateinit var buttonLoadTxt: Button
     private lateinit var buttonScanBarcode: Button
+
+    private val productService = ProductService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,10 +55,27 @@ class MainActivity : AppCompatActivity() {
         buttonLoadTxt.setOnClickListener { loadTxt() }
     }
 
+    // Lanza el escáner de código de barras
+    private fun startBarcodeScanner() {
+        val options = ScanOptions()
+        options.setPrompt("Escanea el código de barras") // Personalizar texto del escáner si es necesario
+        barcodeScanner.launch(options)
+    }
+
+    // Registro de la actividad del escáner
+    private val barcodeScanner =
+        registerForActivityResult(ScanContract()) { result ->
+            if (result?.contents != null) {
+                val barcode = result.contents
+                editTextBarcode.setText(barcode)
+                fetchProductInfo(barcode)
+            }
+        }
+
     private val barcodeInputLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val barcodes = result.data?.getStringExtra("BARCODES")
             barcodes?.split("\n")?.map { it.trim() }?.filter { it.isNotEmpty() }?.forEach { barcode ->
                 fetchProductInfo(barcode)
@@ -79,21 +100,7 @@ class MainActivity : AppCompatActivity() {
     private fun fetchProductInfo(barcode: String) {
         lifecycleScope.launch {
             val productInfo = withContext(Dispatchers.IO) {
-                try {
-                    val url = "https://www.chunichicomics.com/busqueda?controller=search&s=$barcode"
-                    val document = Jsoup.connect(url).get()
-
-                    val productName = document.selectFirst("div.product-description h3.product-title")?.text() ?: "Producto no encontrado"
-                    val price = document.selectFirst("span.product-price")?.text() ?: "Precio no disponible"
-                    val imageUrl = document.selectFirst("img.js-lazy-product-image")?.attr("data-src") ?: ""
-
-                    val baseUrl = "https://www.chunichicomics.com"
-                    val fullImageUrl = if (imageUrl.startsWith("http")) imageUrl else "$baseUrl$imageUrl"
-
-                    ProductInfo(productName, price, fullImageUrl)
-                } catch (e: Exception) {
-                    ProductInfo("Error: ${e.message ?: "Error desconocido"}", "", "")
-                }
+                productService.fetchProductInfo(barcode)
             }
 
             textViewProductName.text = productInfo.name
@@ -104,27 +111,5 @@ class MainActivity : AppCompatActivity() {
                 loadImage("R.drawable.placeholder_image")
             }
         }
-    }
-
-    data class ProductInfo(val name: String, val price: String, val imageUrl: String)
-
-    private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
-        result.contents?.let {
-            editTextBarcode.setText(it)
-            fetchProductInfo(it)
-        } ?: run {
-            textViewProductName.text = "Escaneo cancelado."
-        }
-    }
-
-    private fun startBarcodeScanner() {
-        val options = ScanOptions().apply {
-            setPrompt("Escanea el código de barras")
-            setBeepEnabled(true)
-            setOrientationLocked(false)
-            setCaptureActivity(PortraitCaptureActivity::class.java)
-            setBarcodeImageEnabled(true)
-        }
-        barcodeLauncher.launch(options)
     }
 }
