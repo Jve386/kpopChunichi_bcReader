@@ -6,6 +6,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 
 class MainActivity : AppCompatActivity() {
@@ -32,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         buttonSearch.setOnClickListener {
             val barcode = editTextBarcode.text.toString().trim()
             if (barcode.isNotEmpty()) {
-                FetchProductInfoTask().execute(barcode)  // Llamar a la tarea de búsqueda
+                fetchProductInfo(barcode)  // Llamar a la tarea de búsqueda
             } else {
                 textViewProductName.text = "Introduce un código de barras válido."
             }
@@ -59,39 +63,31 @@ class MainActivity : AppCompatActivity() {
         // Aquí agregarás el código para cargar un archivo Excel
     }
 
-    private inner class FetchProductInfoTask : AsyncTask<String, Void, ProductInfo>() {
-        override fun doInBackground(vararg barcodes: String): ProductInfo {
-            val barcode = barcodes[0]  // Extrae el código de barras del parámetro
+    private fun fetchProductInfo(barcode: String) {
+        lifecycleScope.launch {
+            val productInfo = withContext(Dispatchers.IO) {
+                try {
+                    val url = "https://www.chunichicomics.com/busqueda?controller=search&s=$barcode"
+                    val document = Jsoup.connect(url).get()
 
-            // enlace a la web
-            val url = "https://www.chunichicomics.com/busqueda?controller=search&s=$barcode"
+                    val nameElement = document.selectFirst("div.product-description h3.product-title")
+                    val productName = nameElement?.text() ?: "Producto no encontrado"
 
-            return try {
-                // Realiza la conexión y obtiene el documento HTML
-                val document = Jsoup.connect(url).get()
+                    val priceElement = document.selectFirst("span.product-price")
+                    val price = priceElement?.text() ?: "Precio no disponible"
 
-                // Extraer el nombre del producto
-                val nameElement = document.selectFirst("div.product-description h3.product-title")
-                val productName = nameElement?.text() ?: "Producto no encontrado"
-
-
-                // Extraer el precio
-                val priceElement = document.selectFirst("span.product-price")
-                val price = priceElement?.text() ?: "Precio no disponible"
-
-                // Retorna la información del producto
-                ProductInfo(productName, price)
-            } catch (e: Exception) {
-                ProductInfo("Error: ${e.message}",  "")
+                    ProductInfo(productName, price)
+                } catch (e: Exception) {
+                    ProductInfo("Error: ${e.message}", "")
+                }
             }
-        }
 
-        override fun onPostExecute(result: ProductInfo) {
-            // Actualizar la UI con el nombre y precio
-            textViewProductName.text = result.name
-            textViewProductPrice.text = result.price
+            // Actualiza la UI
+            textViewProductName.text = productInfo.name
+            textViewProductPrice.text = productInfo.price
         }
     }
+
 
     // Data class para almacenar la información del producto
     data class ProductInfo(val name: String, val price: String)
