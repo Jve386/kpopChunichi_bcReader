@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.jve386.kpopchunichi_bcreader"
-        minSdk = 24
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -89,4 +89,5 @@ dependencies {
 //    ksp(libs.glide.compiler)  // Cambiado de kapt a ksp
     implementation(libs.coroutines.android)
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("org.apache.poi:poi-ooxml:5.2.4")
 }

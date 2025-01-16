@@ -1,9 +1,12 @@
 package com.jve386.kpopchunichi_bcreader
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +15,6 @@ import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-
 
 class MainActivity : AppCompatActivity() {
     private lateinit var editTextBarcode: EditText
@@ -33,45 +35,58 @@ class MainActivity : AppCompatActivity() {
         textViewProductName = findViewById(R.id.textViewProductName)
         textViewProductPrice = findViewById(R.id.textViewProductPrice)
         buttonLoadTxt = findViewById(R.id.buttonLoadTxt)
-        buttonLoadExcel = findViewById(R.id.buttonLoadExcel)
         buttonScanBarcode = findViewById(R.id.buttonScanBarcode)
 
-        // Setea el listener para el botón de escaneo de códigos de barras
+        // Listener para escanear código de barras
         buttonScanBarcode.setOnClickListener {
             startBarcodeScanner()
         }
 
-        // Setea el listener para el botón de búsqueda
+        // Listener para buscar producto manualmente
         buttonSearch.setOnClickListener {
             val barcode = editTextBarcode.text.toString().trim()
             if (barcode.isNotEmpty()) {
-                fetchProductInfo(barcode)  // Llamar a la tarea de búsqueda
+                fetchProductInfo(barcode)
             } else {
                 textViewProductName.text = "Introduce un código de barras válido."
             }
         }
 
-        // Listener para el botón "Cargar txt"
+        // Listener para cargar códigos manualmente
         buttonLoadTxt.setOnClickListener {
-            loadTxt() // Llamada a la función vacía
-        }
-
-        // Listener para el botón "Cargar Excel"
-        buttonLoadExcel.setOnClickListener {
-            loadExcel() // Llamada a la función vacía
+            loadTxt()
         }
     }
 
-    // Función vacía para cargar txt
+    /**
+     * Lanzador para la actividad de ingreso de códigos de barras manualmente
+     */
+    private val barcodeInputLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            val barcodes = data?.getStringExtra("BARCODES")
+            if (!barcodes.isNullOrEmpty()) {
+                val barcodeList = barcodes.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
+                barcodeList.forEach { barcode ->
+                    fetchProductInfo(barcode)
+                }
+            }
+        }
+    }
+
+    /**
+     * Abre la pantalla para ingresar códigos manualmente
+     */
     private fun loadTxt() {
-        // Aquí agregarás el código para cargar un archivo txt
+        val intent = Intent(this, BarcodeInputActivity::class.java)
+        barcodeInputLauncher.launch(intent)
     }
 
-    // Función vacía para cargar Excel
-    private fun loadExcel() {
-        // Aquí agregarás el código para cargar un archivo Excel
-    }
-
+    /**
+     * Consulta la información de un producto a partir de un código de barras
+     */
     private fun fetchProductInfo(barcode: String) {
         lifecycleScope.launch {
             val productInfo = withContext(Dispatchers.IO) {
@@ -87,36 +102,42 @@ class MainActivity : AppCompatActivity() {
 
                     ProductInfo(productName, price)
                 } catch (e: Exception) {
-                    // Provide a more detailed error message
-                    ProductInfo("Error: ${e.message ?: "Unknown error"}", "")
+                    ProductInfo("Error: ${e.message ?: "Error desconocido"}", "")
                 }
             }
 
-            // Update UI with the result
+            // Actualiza la interfaz con la información del producto
             textViewProductName.text = productInfo.name
             textViewProductPrice.text = productInfo.price
         }
     }
 
-
-    // Data class para almacenar la información del producto
+    /**
+     * Data class para almacenar la información del producto
+     */
     data class ProductInfo(val name: String, val price: String)
 
+    /**
+     * Lanzador del escáner de código de barras
+     */
     private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
             editTextBarcode.setText(result.contents)
-            fetchProductInfo(result.contents)  // Buscar el producto escaneado
+            fetchProductInfo(result.contents)
         } else {
             textViewProductName.text = "Escaneo cancelado."
         }
     }
 
+    /**
+     * Inicia el escáner de código de barras
+     */
     private fun startBarcodeScanner() {
         val options = ScanOptions().apply {
             setPrompt("Escanea el código de barras")
             setBeepEnabled(true)
-            setOrientationLocked(false)  // Asegura que siga la orientación del dispositivo
-            setCaptureActivity(PortraitCaptureActivity::class.java)  // Forzar vertical
+            setOrientationLocked(false)
+            setCaptureActivity(PortraitCaptureActivity::class.java)
             setBarcodeImageEnabled(true)
         }
         barcodeLauncher.launch(options)

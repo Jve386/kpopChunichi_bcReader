@@ -69,16 +69,8 @@
             android:id="@+id/buttonLoadTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cargar txt"
+            android:text="Cargar codigos de barras"
             android:layout_marginEnd="8dp"
-            android:textSize="14sp" />
-
-        <Button
-            android:id="@+id/buttonLoadExcel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cargar Excel"
-            android:layout_marginStart="8dp"
             android:textSize="14sp" />
     </LinearLayout>
 
